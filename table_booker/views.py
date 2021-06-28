@@ -54,6 +54,7 @@ def signup_page(request):
 
 
 def logout_page(request):
-    return render(request, "logout.html", context={})
+    logout(request)
+    messages.info(request, "You have successfully logged out.")
+    return redirect("table_booker:login")
 
-# Create your views here.
