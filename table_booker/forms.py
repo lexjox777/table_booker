@@ -38,5 +38,5 @@ class BookingForm(forms.ModelForm):
         cleaned_data = super().clean()
         date = cleaned_data["date"]
 
-        if date git< timezone.now():
+        if date < timezone.now():
             raise ValidationError("Date cannot be in the past")
