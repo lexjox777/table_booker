@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.shortcuts import redirect, render
-from .forms import UserForm
+from .forms import UserForm, BookingForm
 from .models import Restaurant
 
 def home_page(request):
@@ -11,6 +11,35 @@ def home_page(request):
 
     context = {"restaurants": Restaurant.objects.all()}
     return render(request, "home.html", context=context)
+
+def book_restaurant(request, restaurant_id):
+   if not request.user.is_authenticated:
+        return redirect("table_booker:login")
+
+   try:
+      restaurant = Restaurant.objects.get(id=restaurant_id)
+   except Restaurant.DoesNotExist:
+      restaurant = None
+
+   if restaurant is None:
+      message.error(request, "Invalid restaurant supplied")
+      return redirect("table_booker:home")
+
+   if request.method=="POST":
+      form = BookingForm(request.POST)
+
+      if form.is_valid():
+        booking=form.save(commit=False)
+        booking.restaurant=restaurant
+        booking.user=request.user
+        booking.save()
+        messages.info(request,f"You successfully booked{restaurant}")
+        return redirect("table_booker:home")
+   else:
+      form= BookingForm
+
+   return render(request=request, template_name="book_restaurant.html", context={"booking_form": form},)
+
 
 
 def login_page(request):
